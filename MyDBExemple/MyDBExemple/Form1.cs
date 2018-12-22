@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace MyDBExemple
 {
     public partial class Form1 : Form
     {
+        private List<TextBox> listNewUserTextBoxs = new List<TextBox>();
+
         private SqlConnection sqlConnection;
         private SqlCommand sqlCommand;
         private SqlDataReader sqlDataReader;
@@ -29,10 +26,21 @@ namespace MyDBExemple
         public Form1()
         {
             InitializeComponent();
+
+            listNewUserTextBoxs.Add(NewUserTextBoxLoginName);
+            listNewUserTextBoxs.Add(NewUserTextBoxPassword);
+            listNewUserTextBoxs.Add(NewUserTextBoxFirstName);
+            listNewUserTextBoxs.Add(NewUserTextBoxLastName);
+            listNewUserTextBoxs.Add(NewUserTextBoxEmail);
+            listNewUserTextBoxs.Add(NewUserTextBoxPhone);
+
             sqlConnection = new SqlConnection(conectDB);
             sqlConnection.Open();
         }
 
+        /// <summary>
+        /// Создает нового пользователя
+        /// </summary>
         private void NewUserButtonSignUp_Click(object sender, EventArgs e)
         {
             if (sqlConnection != null && sqlConnection.State == ConnectionState.Closed)
@@ -46,9 +54,16 @@ namespace MyDBExemple
             sqlCommand.Parameters.AddWithValue("Email", NewUserTextBoxEmail.Text);
             sqlCommand.Parameters.AddWithValue("Phone", NewUserTextBoxPhone.Text);
             sqlCommand.ExecuteNonQuery();
+
+            foreach (var item in listNewUserTextBoxs)
+                item.Clear();
+
             GetAllUsersData();
         }
 
+        /// <summary>
+        /// Удоляет пользователя по User_Id
+        /// </summary>
         private void DeleteUserButton_Click(object sender, EventArgs e)
         {
             sqlCommand = new SqlCommand("DELETE FROM [Users] WHERE [User_Id] = @User_Id", sqlConnection);
@@ -57,6 +72,9 @@ namespace MyDBExemple
             GetAllUsersData();
         }
 
+        /// <summary>
+        /// Возвращает данные о пользователя по User_Id  
+        /// </summary>
         private void UpdateUserDataButtonGetUserData_Click(object sender, EventArgs e)
         {
             sqlCommand = new SqlCommand("SELECT * FROM [Users] WHERE [User_Id] = @User_Id", sqlConnection);
@@ -72,16 +90,41 @@ namespace MyDBExemple
             sqlDataReader.Close();
         }
 
+        /// <summary>
+        /// Обнавляет данные Пользователя по User_Id
+        /// </summary>
         private void UpdateUserDataButton_Click(object sender, EventArgs e)
         {
+            sqlCommand = new SqlCommand("UPDATE [Users] " +
+                                        "SET [Login_Name] = @Login_Name , " +
+                                        "[Password] = @Password , " +
+                                        "[First_Name] = @First_Name , " +
+                                        "[Last_Name] = @Last_Name , " +
+                                        "[Email] = @Email , " +
+                                        "[Phone] = @Phone WHERE [User_Id] = @User_Id", sqlConnection);
 
+            sqlCommand.Parameters.AddWithValue("User_Id", UpdateUserDateTextBoxID.Text);
+            sqlCommand.Parameters.AddWithValue("Login_Name", UpdateUserDateTextBoxLoginName.Text);
+            sqlCommand.Parameters.AddWithValue("Password", UpdateUserDateTextBoxPassword.Text);
+            sqlCommand.Parameters.AddWithValue("First_Name", UpdateUserDateTextBoxFirstName.Text);
+            sqlCommand.Parameters.AddWithValue("Last_Name", UpdateUserDateTextBoxLastName.Text);
+            sqlCommand.Parameters.AddWithValue("Email", UpdateUserDateTextBoxEmail.Text);
+            sqlCommand.Parameters.AddWithValue("Phone", UpdateUserDateTextBoxPhone.Text);
+            sqlCommand.ExecuteNonQuery();
+            GetAllUsersData();
         }
 
+        /// <summary>
+        /// Возвращает все данные всех пользователей
+        /// </summary>
         private void SelectAllUserDataButton_Click(object sender, EventArgs e)
         {
             GetAllUsersData();
         }
 
+        /// <summary>
+        /// Возвращает все данные о всех пользователей и добавляет в ListBox
+        /// </summary>
         private void GetAllUsersData()
         {
             SelectAllUserDataListBox.Items.Clear();
