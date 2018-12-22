@@ -14,7 +14,7 @@ namespace MyDBExemple
         private SqlCommand sqlCommand;
         private SqlDataReader sqlDataReader;
 
-        private String conectDB = @"Data Source=.;
+        private string conectDB = @"Data Source=.;
                                     Initial Catalog=UsersDB;
                                     Integrated Security=True;
                                     Connect Timeout=30;
