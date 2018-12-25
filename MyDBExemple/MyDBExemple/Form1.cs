@@ -46,13 +46,14 @@ namespace MyDBExemple
             if (sqlConnection != null && sqlConnection.State == ConnectionState.Closed)
                 sqlConnection.Open();
 
-            sqlCommand = new SqlCommand("INSERT INTO [Users] Values (@Login_Name, @Password, @First_Name, @Last_Name, @Email, @Phone)", sqlConnection);
-            sqlCommand.Parameters.AddWithValue("Login_Name", NewUserTextBoxLoginName.Text);
-            sqlCommand.Parameters.AddWithValue("Password", NewUserTextBoxPassword.Text);
-            sqlCommand.Parameters.AddWithValue("First_Name", NewUserTextBoxFirstName.Text);
-            sqlCommand.Parameters.AddWithValue("Last_Name", NewUserTextBoxLastName.Text);
-            sqlCommand.Parameters.AddWithValue("Email", NewUserTextBoxEmail.Text);
-            sqlCommand.Parameters.AddWithValue("Phone", NewUserTextBoxPhone.Text);
+            sqlCommand = new SqlCommand($"INSERT INTO [Users] " +
+                                        $"Values ('{NewUserTextBoxLoginName.Text}', " +
+                                                $"'{NewUserTextBoxPassword.Text}', " +
+                                                $"'{NewUserTextBoxFirstName.Text}', " +
+                                                $"'{NewUserTextBoxLastName.Text}', " +
+                                                $"'{NewUserTextBoxEmail.Text}', " +
+                                                $"'{NewUserTextBoxPhone.Text}')", sqlConnection);
+
             sqlCommand.ExecuteNonQuery();
 
             foreach (var item in listNewUserTextBoxs)
@@ -66,8 +67,8 @@ namespace MyDBExemple
         /// </summary>
         private void DeleteUserButton_Click(object sender, EventArgs e)
         {
-            sqlCommand = new SqlCommand("DELETE FROM [Users] WHERE [User_Id] = @User_Id", sqlConnection);
-            sqlCommand.Parameters.AddWithValue("User_Id", DeleteUserTextBoxID.Text);
+            sqlCommand = new SqlCommand($"DELETE FROM [Users] " +
+                                        $"WHERE [User_Id] = {DeleteUserTextBoxID.Text}", sqlConnection);
             sqlCommand.ExecuteNonQuery();
             GetAllUsersData();
         }
@@ -95,21 +96,14 @@ namespace MyDBExemple
         /// </summary>
         private void UpdateUserDataButton_Click(object sender, EventArgs e)
         {
-            sqlCommand = new SqlCommand("UPDATE [Users] " +
-                                        "SET [Login_Name] = @Login_Name , " +
-                                        "[Password] = @Password , " +
-                                        "[First_Name] = @First_Name , " +
-                                        "[Last_Name] = @Last_Name , " +
-                                        "[Email] = @Email , " +
-                                        "[Phone] = @Phone WHERE [User_Id] = @User_Id", sqlConnection);
-
-            sqlCommand.Parameters.AddWithValue("User_Id", UpdateUserDateTextBoxID.Text);
-            sqlCommand.Parameters.AddWithValue("Login_Name", UpdateUserDateTextBoxLoginName.Text);
-            sqlCommand.Parameters.AddWithValue("Password", UpdateUserDateTextBoxPassword.Text);
-            sqlCommand.Parameters.AddWithValue("First_Name", UpdateUserDateTextBoxFirstName.Text);
-            sqlCommand.Parameters.AddWithValue("Last_Name", UpdateUserDateTextBoxLastName.Text);
-            sqlCommand.Parameters.AddWithValue("Email", UpdateUserDateTextBoxEmail.Text);
-            sqlCommand.Parameters.AddWithValue("Phone", UpdateUserDateTextBoxPhone.Text);
+            sqlCommand = new SqlCommand($"UPDATE [Users] " +
+                                        $"SET [Login_Name] = '{UpdateUserDateTextBoxLoginName.Text}' , " +
+                                        $"[Password] = '{UpdateUserDateTextBoxPassword.Text}' , " +
+                                        $"[First_Name] = '{UpdateUserDateTextBoxFirstName.Text}' , " +
+                                        $"[Last_Name] = '{UpdateUserDateTextBoxLastName.Text}' , " +
+                                        $"[Email] = '{UpdateUserDateTextBoxEmail.Text}' , " +
+                                        $"[Phone] = '{UpdateUserDateTextBoxPhone.Text}' " +
+                                        $"WHERE [User_Id] = {UpdateUserDateTextBoxID.Text}", sqlConnection);
             sqlCommand.ExecuteNonQuery();
             GetAllUsersData();
         }
