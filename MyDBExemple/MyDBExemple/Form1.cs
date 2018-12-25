@@ -78,8 +78,7 @@ namespace MyDBExemple
         /// </summary>
         private void UpdateUserDataButtonGetUserData_Click(object sender, EventArgs e)
         {
-            sqlCommand = new SqlCommand("SELECT * FROM [Users] WHERE [User_Id] = @User_Id", sqlConnection);
-            sqlCommand.Parameters.AddWithValue("User_Id", UpdateUserDateTextBoxID.Text);
+            sqlCommand = new SqlCommand($"SELECT * FROM [Users] WHERE [User_Id] = {UpdateUserDateTextBoxID.Text}", sqlConnection);
             sqlDataReader = sqlCommand.ExecuteReader();
             sqlDataReader.Read();
             UpdateUserDateTextBoxLoginName.Text = Convert.ToString(sqlDataReader["Login_Name"]);
