@@ -390,7 +390,7 @@
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(10, 24);
+            this.label14.Location = new System.Drawing.Point(10, 23);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(43, 13);
             this.label14.TabIndex = 33;
@@ -411,7 +411,7 @@
             // 
             // DeleteUserButton
             // 
-            this.DeleteUserButton.Location = new System.Drawing.Point(142, 17);
+            this.DeleteUserButton.Location = new System.Drawing.Point(142, 18);
             this.DeleteUserButton.Name = "DeleteUserButton";
             this.DeleteUserButton.Size = new System.Drawing.Size(83, 23);
             this.DeleteUserButton.TabIndex = 35;
