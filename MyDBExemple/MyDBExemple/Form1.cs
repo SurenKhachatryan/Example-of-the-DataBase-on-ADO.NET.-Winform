@@ -70,8 +70,10 @@ namespace MyDBExemple
                 command.Parameters.Add(new SqlParameter("@LastName", NewUserTextBoxLastName.Text));
                 command.Parameters.Add(new SqlParameter("@Email", NewUserTextBoxEmail.Text));
                 command.Parameters.Add(new SqlParameter("@Phone", NewUserTextBoxPhone.Text));
+
                 command.ExecuteNonQuery();
             }
+
             ClearTextBoxs.Clear(newUserTextBoxsArr);
             Get_All_Users_Data();
         }
@@ -91,6 +93,8 @@ namespace MyDBExemple
 
                 command.ExecuteNonQuery();
             }
+
+            DeleteUserTextBoxID.Text = string.Empty;
             Get_All_Users_Data();
         }
 
@@ -147,6 +151,7 @@ namespace MyDBExemple
 
                 command.ExecuteNonQuery();
             }
+
             ClearTextBoxs.Clear(updateUserDataTextBoxArr);
             Get_All_Users_Data();
         }
@@ -183,7 +188,6 @@ namespace MyDBExemple
                                                                       read["Password"].ToString(),
                                                                       read["Email"].ToString(),
                                                                       read["Phone"].ToString()});
-
                 }
             }
         }
