@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
 using System.Data.SqlClient;
 using System.Windows.Forms;
 
@@ -8,103 +6,149 @@ namespace MyDBExemple
 {
     public partial class Form1 : Form
     {
-        private List<TextBox> listNewUserTextBoxs = new List<TextBox>();
+        #region DB Prop
+        private SqlConnection connect;
+        private SqlCommand command;
+        private SqlDataReader read;
 
-        private SqlConnection sqlConnection;
-        private SqlCommand sqlCommand;
-        private SqlDataReader sqlDataReader;
+        private string connectionString = @"Data Source=.;
+                                            Initial Catalog=UsersDB;
+                                            Integrated Security=True;
+                                            Connect Timeout=30;
+                                            Encrypt=False;
+                                            TrustServerCertificate=False;
+                                            ApplicationIntent=ReadWrite;
+                                            MultiSubnetFailover=False";
+        #endregion
 
-        private string conectDB = @"Data Source=.;
-                                    Initial Catalog=UsersDB;
-                                    Integrated Security=True;
-                                    Connect Timeout=30;
-                                    Encrypt=False;
-                                    TrustServerCertificate=False;
-                                    ApplicationIntent=ReadWrite;
-                                    MultiSubnetFailover=False";
+        #region TextBoxArrays
+        private TextBox[] updateUserDataTextBoxArr;
+        private TextBox[] newUserTextBoxsArr;
+        #endregion
 
         public Form1()
         {
             InitializeComponent();
 
-            listNewUserTextBoxs.Add(NewUserTextBoxLoginName);
-            listNewUserTextBoxs.Add(NewUserTextBoxPassword);
-            listNewUserTextBoxs.Add(NewUserTextBoxFirstName);
-            listNewUserTextBoxs.Add(NewUserTextBoxLastName);
-            listNewUserTextBoxs.Add(NewUserTextBoxEmail);
-            listNewUserTextBoxs.Add(NewUserTextBoxPhone);
+            newUserTextBoxsArr = new TextBox[]
+            {
+                NewUserTextBoxFirstName,
+                NewUserTextBoxLastName,
+                NewUserTextBoxLoginName,
+                NewUserTextBoxPassword,
+                NewUserTextBoxEmail,
+                NewUserTextBoxPhone
+            };
 
-            sqlConnection = new SqlConnection(conectDB);
-            sqlConnection.Open();
+            updateUserDataTextBoxArr = new TextBox[]
+            {
+                UpdateUserDataTextBoxFirstName,
+                UpdateUserDataTextBoxLastName,
+                UpdateUserDataTextBoxLoginName,
+                UpdateUserDataTextBoxPassword,
+                UpdateUserDataTextBoxEmail,
+                UpdateUserDataTextBoxPhone
+            };
         }
 
         /// <summary>
         /// Создает нового пользователя
         /// </summary>
-        private void NewUserButtonSignUp_Click(object sender, EventArgs e)
+        private void New_User_Button_Sign_Up_Click(object sender, EventArgs e)
         {
-            if (sqlConnection != null && sqlConnection.State == ConnectionState.Closed)
-                sqlConnection.Open();
+            using (connect = new SqlConnection(connectionString))
+            {
+                connect.Open();
 
-            sqlCommand = new SqlCommand($"INSERT INTO [Users] " +
-                                        $"Values ('{NewUserTextBoxLoginName.Text}', " +
-                                                $"'{NewUserTextBoxPassword.Text}', " +
-                                                $"'{NewUserTextBoxFirstName.Text}', " +
-                                                $"'{NewUserTextBoxLastName.Text}', " +
-                                                $"'{NewUserTextBoxEmail.Text}', " +
-                                                $"'{NewUserTextBoxPhone.Text}')", sqlConnection);
+                command = new SqlCommand("INSERT INTO [Users] Values (@LoginName , @Password ," +
+                                                                    " @FirstName , @LastName ," +
+                                                                    " @Email , @Phone)", connect);
 
-            sqlCommand.ExecuteNonQuery();
-
-            foreach (var item in listNewUserTextBoxs)
-                item.Clear();
-
-            GetAllUsersData();
+                command.Parameters.Add(new SqlParameter("@LoginName", NewUserTextBoxLoginName.Text));
+                command.Parameters.Add(new SqlParameter("@Password", NewUserTextBoxPassword.Text));
+                command.Parameters.Add(new SqlParameter("@FirstName", NewUserTextBoxFirstName.Text));
+                command.Parameters.Add(new SqlParameter("@LastName", NewUserTextBoxLastName.Text));
+                command.Parameters.Add(new SqlParameter("@Email", NewUserTextBoxEmail.Text));
+                command.Parameters.Add(new SqlParameter("@Phone", NewUserTextBoxPhone.Text));
+                command.ExecuteNonQuery();
+            }
+            ClearTextBoxs.Clear(newUserTextBoxsArr);
+            Get_All_Users_Data();
         }
 
         /// <summary>
         /// Удоляет пользователя по User_Id
         /// </summary>
-        private void DeleteUserButton_Click(object sender, EventArgs e)
+        private void Delete_User_Button_Click(object sender, EventArgs e)
         {
-            sqlCommand = new SqlCommand($"DELETE FROM [Users] " +
-                                        $"WHERE [User_Id] = {DeleteUserTextBoxID.Text}", sqlConnection);
-            sqlCommand.ExecuteNonQuery();
-            GetAllUsersData();
+            using (connect = new SqlConnection(connectionString))
+            {
+                connect.Open();
+
+                command = new SqlCommand($"DELETE FROM [Users] WHERE [User_Id] = @User_ID", connect);
+
+                command.Parameters.Add(new SqlParameter("@User_ID", DeleteUserTextBoxID.Text));
+
+                command.ExecuteNonQuery();
+            }
+            Get_All_Users_Data();
         }
 
         /// <summary>
         /// Возвращает данные о пользователя по User_Id  
         /// </summary>
-        private void UpdateUserDataButtonGetUserData_Click(object sender, EventArgs e)
+        private void Update_User_Data_Button_Get_User_Data_Click(object sender, EventArgs e)
         {
-            sqlCommand = new SqlCommand($"SELECT * FROM [Users] WHERE [User_Id] = {UpdateUserDateTextBoxID.Text}", sqlConnection);
-            sqlDataReader = sqlCommand.ExecuteReader();
-            sqlDataReader.Read();
-            UpdateUserDateTextBoxLoginName.Text = Convert.ToString(sqlDataReader["Login_Name"]);
-            UpdateUserDateTextBoxPassword.Text = Convert.ToString(sqlDataReader["Password"]);
-            UpdateUserDateTextBoxFirstName.Text = Convert.ToString(sqlDataReader["First_Name"]);
-            UpdateUserDateTextBoxLastName.Text = Convert.ToString(sqlDataReader["Last_Name"]);
-            UpdateUserDateTextBoxEmail.Text = Convert.ToString(sqlDataReader["Email"]);
-            UpdateUserDateTextBoxPhone.Text = Convert.ToString(sqlDataReader["Phone"]);
-            sqlDataReader.Close();
+            using (connect = new SqlConnection(connectionString))
+            {
+                connect.Open();
+
+                command = new SqlCommand($"SELECT * FROM [Users] WHERE [User_Id] = @User_ID", connect);
+
+                command.Parameters.Add(new SqlParameter("@User_ID", UpdateUserDataTextBoxID.Text));
+
+                read = command.ExecuteReader();
+
+                read.Read();
+
+                UpdateUserDataTextBoxLoginName.Text = read["Login_Name"].ToString();
+                UpdateUserDataTextBoxPassword.Text = read["Password"].ToString();
+                UpdateUserDataTextBoxFirstName.Text = read["First_Name"].ToString();
+                UpdateUserDataTextBoxLastName.Text = read["Last_Name"].ToString();
+                UpdateUserDataTextBoxEmail.Text = read["Email"].ToString();
+                UpdateUserDataTextBoxPhone.Text = read["Phone"].ToString();
+            }
         }
 
         /// <summary>
         /// Обнавляет данные Пользователя по User_Id
         /// </summary>
-        private void UpdateUserDataButton_Click(object sender, EventArgs e)
+        private void Update_User_Data_Button_Click(object sender, EventArgs e)
         {
-            sqlCommand = new SqlCommand($"UPDATE [Users] " +
-                                        $"SET [Login_Name] = '{UpdateUserDateTextBoxLoginName.Text}' , " +
-                                        $"[Password] = '{UpdateUserDateTextBoxPassword.Text}' , " +
-                                        $"[First_Name] = '{UpdateUserDateTextBoxFirstName.Text}' , " +
-                                        $"[Last_Name] = '{UpdateUserDateTextBoxLastName.Text}' , " +
-                                        $"[Email] = '{UpdateUserDateTextBoxEmail.Text}' , " +
-                                        $"[Phone] = '{UpdateUserDateTextBoxPhone.Text}' " +
-                                        $"WHERE [User_Id] = {UpdateUserDateTextBoxID.Text}", sqlConnection);
-            sqlCommand.ExecuteNonQuery();
-            GetAllUsersData();
+            using (connect = new SqlConnection(connectionString))
+            {
+                connect.Open();
+
+                command = new SqlCommand($"UPDATE [Users] SET [Login_Name] = @LoginName , " +
+                                                             "[Password] = @Password , " +
+                                                             "[First_Name] = @FirstName , " +
+                                                             "[Last_Name] = @LastName , " +
+                                                             "[Email] = @Email , " +
+                                                             "[Phone] = @Phone " +
+                                                             "WHERE [User_Id] = @User_ID", connect);
+
+                command.Parameters.Add(new SqlParameter("@LoginName", UpdateUserDataTextBoxLoginName.Text));
+                command.Parameters.Add(new SqlParameter("@Password", UpdateUserDataTextBoxPassword.Text));
+                command.Parameters.Add(new SqlParameter("@FirstName", UpdateUserDataTextBoxFirstName.Text));
+                command.Parameters.Add(new SqlParameter("@LastName", UpdateUserDataTextBoxLastName.Text));
+                command.Parameters.Add(new SqlParameter("@Email", UpdateUserDataTextBoxEmail.Text));
+                command.Parameters.Add(new SqlParameter("@Phone", UpdateUserDataTextBoxPhone.Text));
+                command.Parameters.Add(new SqlParameter("@User_ID", UpdateUserDataTextBoxID.Text));
+
+                command.ExecuteNonQuery();
+            }
+            ClearTextBoxs.Clear(updateUserDataTextBoxArr);
+            Get_All_Users_Data();
         }
 
         /// <summary>
@@ -112,30 +156,36 @@ namespace MyDBExemple
         /// </summary>
         private void SelectAllUserDataButton_Click(object sender, EventArgs e)
         {
-            GetAllUsersData();
+            Get_All_Users_Data();
         }
 
         /// <summary>
         /// Возвращает все данные о всех пользователей и добавляет в ListBox
         /// </summary>
-        private void GetAllUsersData()
+        private void Get_All_Users_Data()
         {
-            SelectAllUserDataListBox.Items.Clear();
-            sqlCommand = new SqlCommand("SELECT * FROM [Users]", sqlConnection);
-
-            sqlDataReader = sqlCommand.ExecuteReader();
-
-            while (sqlDataReader.Read())
+            using (connect = new SqlConnection(connectionString))
             {
-                SelectAllUserDataListBox.Items.Add(Convert.ToString(sqlDataReader["User_Id"]) + "   " +
-                                                   Convert.ToString(sqlDataReader["Login_Name"]) + "   " +
-                                                   Convert.ToString(sqlDataReader["Password"]) + "   " +
-                                                   Convert.ToString(sqlDataReader["First_Name"]) + "   " +
-                                                   Convert.ToString(sqlDataReader["Last_Name"]) + "   " +
-                                                   Convert.ToString(sqlDataReader["Email"]) + "   " +
-                                                   Convert.ToString(sqlDataReader["Phone"]));
+                connect.Open();
+
+                SelectAllUserDataGridView.Rows.Clear();
+
+                command = new SqlCommand("SELECT * FROM [Users]", connect);
+
+                read = command.ExecuteReader();
+
+                while (read.Read())
+                {
+                    SelectAllUserDataGridView.Rows.Add(new string[] { read["User_Id"].ToString(),
+                                                                      read["First_Name"].ToString(),
+                                                                      read["Last_Name"].ToString(),
+                                                                      read["Login_Name"].ToString(),
+                                                                      read["Password"].ToString(),
+                                                                      read["Email"].ToString(),
+                                                                      read["Phone"].ToString()});
+
+                }
             }
-            sqlDataReader.Close();
         }
     }
 }
